@@ -1,0 +1,55 @@
+version: '3.9'
+
+services:
+  # 应用服务（前端 + 后端）
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: base-project-app
+    ports:
+      - '4000:4000'
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: base_project
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-postgres123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - base-network
+
+  # PostgreSQL 数据库服务
+  postgres:
+    image: postgres:17-alpine
+    container_name: base-project-postgres
+    environment:
+      POSTGRES_DB: base_project
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # 初始化 SQL 脚本（可在此目录放置建表语句）
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - '5432:5432'   # 开发时可访问，生产环境可移除此映射
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - base-network
+
+networks:
+  base-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
