@@ -1,7 +1,7 @@
 # AI 开发项目设计规范指南
 
 > 本文档用于指导 AI 助手开发新的前端项目，确保代码风格、UI 设计、组件使用符合项目标准。
-涉及到大模型相关需求的API接口，需要参见项目目录下的《大模型应用调用接口API.md》文档
+> 在开始具体功能开发前，请优先阅读 `docs` 目录下的相关说明文档（如《大模型应用调用接口API.md》），了解项目整体约定与接口规范。
 ---
 
 ## 📋 目录
@@ -21,58 +21,57 @@
 
 ### 项目定位
 
-这是一个**企业级前端管理平台**，采用现代化的前端技术栈，具有以下特点：
+这是一个**企业级前后端基础平台模板**，采用现代化的技术栈，具有以下特点：
 
-- **模块化架构**: 三层模块化设计（base/modules/modules-ai）
+- **架构形态**: 前后端分离（frontend + backend），前端后续可按规划演进为三层模块化设计（modules-base/modules/modules-ai）
 - **组件化开发**: 高度封装的标准化组件
 - **主题系统**: 支持多主题切换（亮色/暗色/大屏主题）
 - **国际化**: 中英文双语支持
 - **权限管理**: 完善的 RBAC 权限体系
 
+> 说明：当前前端首页（`HomeView`）仅作为 Demo 示例页面，用于展示基础布局与技术栈，不作为业务 UI 规范。后续在本项目基础上开发的实际业务功能**无需参考现有首页的 UI 设计，也无需集成当前首页逻辑**，可以在路由和视图层面**直接覆盖或替换首页实现**。
+
 ### 技术特点
 
-- **Vue 3 Composition API**: 使用最新的组合式 API
-- **TypeScript**: 完整的类型安全支持
-- **Vite**: 快速的开发构建工具
-- **Pinia**: 新一代状态管理
-- **Ant Design Vue**: 企业级 UI 组件库
+- **前端：Vue 3 + Vite**: 使用组合式 API 与 Vite 构建工具
+- **UI：Ant Design Vue**: 企业级 UI 组件库，统一交互与视觉规范
+- **网络请求：Axios**: 统一封装接口调用
+- **后端：Express + PostgreSQL**: 提供 RESTful API 与持久化存储
 
 ---
 
 ## 技术栈规范
 
-### 核心框架
+### 前端（frontend）
+
+当前前端实际依赖如下（见 `frontend/package.json`），在新页面/组件开发时应保持一致：
 
 ```json
 {
-  "vue": "^3.5.17",           // Vue 3 Composition API
-  "typescript": "~5.8.0",     // 类型安全
-  "vite": "^7.0.0",           // 构建工具
-  "pinia": "^3.0.3",          // 状态管理
-  "vue-router": "^4.5.1"      // 路由管理
+  "vue": "^3.5.13",           // Vue 3 组合式 API
+  "vue-router": "^4.5.0",     // 路由管理
+  "ant-design-vue": "^4.2.6", // 主 UI 组件库
+  "axios": "^1.7.9",          // HTTP 请求
+  "vite": "^6.1.0"            // 构建工具
 }
 ```
 
-### UI 组件库
+如需在后续引入 TypeScript、Pinia、ECharts 等，请在保证项目统一性的前提下扩展本节说明。
+
+### 后端（backend）
+
+当前后端采用 Node.js + Express + PostgreSQL，核心依赖（见 `backend/package.json`）如下：
 
 ```json
 {
-  "ant-design-vue": "^4.2.6",  // 主 UI 库
-  "echarts": "5.4.0",          // 图表库
-  "@antv/x6": "2.18.1"         // 图形编辑
+  "express": "^4.21.2",  // Web 服务框架
+  "pg": "^8.13.3",       // PostgreSQL 客户端
+  "cors": "^2.8.5",      // 跨域支持
+  "dotenv": "^16.4.7"    // 环境变量管理
 }
 ```
 
-### 工具库
-
-```json
-{
-  "axios": "^1.10.0",         // HTTP 请求
-  "dayjs": "^1.11.13",        // 日期处理
-  "lodash": "^4.17.21",       // 工具函数
-  "rxjs": "^7.8.2"            // 响应式编程
-}
-```
+前端构建产物最终由后端进行静态资源托管，并通过 Docker 统一打包部署。
 
 ---
 
@@ -80,29 +79,31 @@
 
 ### 1. 模块化设计
 
-#### 三层架构
+#### 当前整体架构
+
+项目采用前后端分离架构，目录结构大致如下：
 
 ```
-src/
-├── modules-base/      # 基础层 - 公共基础设施
-│   ├── components/    # 基础组件
-│   ├── utils/         # 工具函数
-│   ├── store/         # 基础状态
-│   └── types/         # 类型定义
-├── modules/           # 业务层 - 核心业务模块
-│   ├── module-a/      # 业务模块A
-│   ├── module-b/      # 业务模块B
-│   └── module-c/      # 业务模块C
-└── modules-ai/        # AI层 - 智能化功能
-    ├── ai-feature-1/  # AI功能1
-    └── ai-feature-2/  # AI功能2
+.
+├── frontend/           # 前端应用（Vue 3 + Vite + Ant Design Vue）
+│   ├── src/
+│   │   ├── api/       # 接口封装（axios）
+│   │   ├── router/    # 路由配置
+│   │   ├── views/     # 页面视图组件
+│   │   ├── App.vue
+│   │   └── main.js
+│   └── public/
+└── backend/            # 后端服务（Express + PostgreSQL）
+    ├── src/
+    │   ├── routes/    # 路由与接口
+    │   ├── middlewares/ # 中间件
+    │   ├── utils/     # 工具函数（统一响应等）
+    │   ├── config/    # 数据库等配置
+    │   └── app.js
+    └── public/        # 前端构建产物静态托管目录
 ```
 
-#### 模块划分原则
-
-- **modules-base**: 业务无关的基础设施
-- **modules**: 核心业务功能模块
-- **modules-ai**: AI 智能化功能模块
+> 说明：原文中提到的 `modules-base / modules / modules-ai` 三层前端模块化架构属于**规划中的理想分层方案**，在当前实际代码中尚未落地。如后续引入大规模业务模块，可在 `frontend/src` 下按该思路进一步拆分。
 
 ### 2. 组件化开发
 
@@ -1055,7 +1056,7 @@ const { handleCopy } = useCopyBtn();
 
 1. ✅ **使用标准化组件**: CTable、PageSearchBar、FormModal 等
 2. ✅ **遵循设计规范**: 颜色、间距、字体、圆角等
-3. ✅ **采用模块化架构**: modules-base/modules/modules-ai
+3. ✅ **采用模块化架构**: 当前为前后端分离（frontend/backend），前端规划演进为 modules-base/modules/modules-ai
 4. ✅ **保证类型安全**: 完整的 TypeScript 类型定义
 5. ✅ **配置化开发**: 避免硬编码，提高可维护性
 6. ✅ **性能优化**: computed、shallowRef、虚拟滚动等
