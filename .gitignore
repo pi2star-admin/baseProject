@@ -10,6 +10,12 @@ node_modules/
 frontend/dist/
 backend/public/
 
+# 后端 TypeScript 编译产物
+backend/dist/
+
+# Prisma 生成的客户端（由 prisma generate 自动生成）
+backend/node_modules/.prisma/
+
 # 日志
 *.log
 logs/

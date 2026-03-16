@@ -1,0 +1,25 @@
+// Prisma Schema
+// 运行 `prisma db pull` 可从现有数据库反向生成模型
+// 运行 `prisma generate` 生成 PrismaClient
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== 示例模型（按需修改或删除）=====
+// model User {
+//   id         String   @id @default(cuid())
+//   createdAt  DateTime @default(now()) @map("create_time")
+//   updatedAt  DateTime @updatedAt       @map("update_time")
+//   username   String   @unique
+//   password   String
+//   name       String?
+//   enable     Boolean  @default(true)
+//
+//   @@map("sys_user")
+// }

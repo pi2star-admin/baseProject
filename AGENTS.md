@@ -36,7 +36,7 @@
 - **前端：Vue 3 + Vite**: 使用组合式 API 与 Vite 构建工具
 - **UI：Ant Design Vue**: 企业级 UI 组件库，统一交互与视觉规范
 - **网络请求：Axios**: 统一封装接口调用
-- **后端：Express + PostgreSQL**: 提供 RESTful API 与持久化存储
+- **后端：Fastify + Prisma + PostgreSQL**: 提供高性能 RESTful API 与持久化存储，TypeScript 全类型安全
 
 ---
 
@@ -60,18 +60,30 @@
 
 ### 后端（backend）
 
-当前后端采用 Node.js + Express + PostgreSQL，核心依赖（见 `backend/package.json`）如下：
+当前后端采用 Node.js + **Fastify + Prisma + PostgreSQL + TypeScript**，核心依赖（见 `backend/package.json`）如下：
 
 ```json
 {
-  "express": "^4.21.2",  // Web 服务框架
-  "pg": "^8.13.3",       // PostgreSQL 客户端
-  "cors": "^2.8.5",      // 跨域支持
-  "dotenv": "^16.4.7"    // 环境变量管理
+  "fastify": "^4.28.1",         // Web 服务框架（高性能，原生 TS 支持）
+  "@fastify/cors": "^9.0.1",    // 跨域支持
+  "@fastify/helmet": "^11.1.1", // 安全响应头
+  "@fastify/static": "^8.0.3",  // 静态文件托管
+  "@prisma/client": "^5.22.0",  // Prisma ORM（类型安全的数据库访问）
+  "fastify-plugin": "^4.5.1",   // 插件封装工具
+  "zod": "^3.23.8"              // 请求参数校验
 }
 ```
 
-前端构建产物最终由后端进行静态资源托管，并通过 Docker 统一打包部署。
+开发工具：
+```json
+{
+  "typescript": "^5.6.3",  // TypeScript 编译器
+  "tsx": "^4.19.1",         // 开发环境直接运行 TS（tsx watch）
+  "prisma": "^5.22.0"       // Prisma CLI（prisma generate / db pull）
+}
+```
+
+前端构建产物最终由后端进行静态资源托管（`@fastify/static`），并通过 Docker 统一打包部署。
 
 ---
 
@@ -93,14 +105,17 @@
 │   │   ├── App.vue
 │   │   └── main.js
 │   └── public/
-└── backend/            # 后端服务（Express + PostgreSQL）
+└── backend/            # 后端服务（Fastify + Prisma + TypeScript）
+    ├── prisma/
+    │   └── schema.prisma  # 数据模型定义
     ├── src/
-    │   ├── routes/    # 路由与接口
-    │   ├── middlewares/ # 中间件
-    │   ├── utils/     # 工具函数（统一响应等）
-    │   ├── config/    # 数据库等配置
-    │   └── app.js
-    └── public/        # 前端构建产物静态托管目录
+    │   ├── main.ts        # 应用入口
+    │   ├── plugins/       # Fastify 插件（postgres 等）
+    │   ├── modules/       # 业务模块（routes + schema + service）
+    │   ├── types/         # 公共类型定义
+    │   └── utils/         # 工具函数（统一响应等）
+    ├── tsconfig.json      # TypeScript 配置
+    └── public/            # 前端构建产物静态托管目录
 ```
 
 > 说明：原文中提到的 `modules-base / modules / modules-ai` 三层前端模块化架构属于**规划中的理想分层方案**，在当前实际代码中尚未落地。如后续引入大规模业务模块，可在 `frontend/src` 下按该思路进一步拆分。

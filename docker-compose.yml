@@ -12,11 +12,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: base_project
-      DB_USER: postgres
-      DB_PASSWORD: ${DB_PASSWORD:-postgres123}
+      HOST: 0.0.0.0
+      # Prisma 使用 DATABASE_URL 连接数据库
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres123}@postgres:5432/base_project
     depends_on:
       postgres:
         condition: service_healthy

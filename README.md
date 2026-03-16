@@ -11,10 +11,10 @@
 | UI 组件库 | Ant Design Vue | ^4.2 |
 | 前端路由 | Vue Router | ^4.5 |
 | HTTP 请求 | Axios | ^1.7 |
-| 后端框架 | Express | ^4.21 |
+| 后端框架 | Fastify | ^4.28 |
+| 请求校验 | Zod | ^3.23 |
+| 数据库 ORM | Prisma | ^5.22 |
 | 数据库 | PostgreSQL | 17 |
-| 数据库客户端 | pg | ^8.13 |
-| 环境变量 | dotenv | ^16.4 |
 | 运行时 | Node.js | 22 (LTS) |
 
 ## 项目结构
@@ -37,19 +37,23 @@ baseProject/
 │   ├── vite.config.js
 │   └── package.json
 │
-├── backend/                    # 后端项目（Express）
+├── backend/                    # 后端项目（Fastify + Prisma + TypeScript）
+│   ├── prisma/
+│   │   └── schema.prisma       # 数据模型定义
 │   ├── src/
-│   │   ├── config/
-│   │   │   └── db.js           # PostgreSQL 连接池
-│   │   ├── middlewares/
-│   │   │   └── errorHandler.js # 全局错误处理
-│   │   ├── routes/
-│   │   │   ├── index.js        # 路由汇总
-│   │   │   └── system.js       # 系统接口示例
-│   │   ├── utils/
-│   │   │   └── response.js     # 统一响应格式工具
-│   │   └── app.js              # 应用入口
+│   │   ├── main.ts             # 应用入口
+│   │   ├── plugins/
+│   │   │   └── postgres.ts     # Prisma 插件（挂载 fastify.db）
+│   │   ├── modules/            # 业务模块（routes + schema + service）
+│   │   │   └── system/
+│   │   │       ├── routes.ts   # 系统接口路由
+│   │   │       └── schema.ts   # Zod 请求校验 Schema
+│   │   ├── types/
+│   │   │   └── index.ts        # 公共类型定义（Result、BasePageForm 等）
+│   │   └── utils/
+│   │       └── result.ts       # 统一响应格式工具
 │   ├── public/                 # 前端构建产物（自动生成）
+│   ├── tsconfig.json           # TypeScript 配置
 │   ├── env.example             # 环境变量模板
 │   └── package.json
 │
@@ -71,23 +75,23 @@ baseProject/
 {
   "code": 0,        // 0 = 成功，非 0 = 失败
   "data": {},       // 响应数据
-  "message": "success"
+  "message": null   // 成功时为 null，失败时为错误信息
 }
 ```
 
-后端使用 `src/utils/response.js` 中的工具函数：
+后端使用 `src/utils/result.ts` 中的工具函数：
 
-```js
-import { success, fail, serverError } from '../utils/response.js'
+```ts
+import { success, fail, pageSuccess } from '../utils/result.js'
 
 // 成功
-success(res, { id: 1, name: 'test' })
+success({ id: 1, name: 'test' })
 
 // 失败（业务错误）
-fail(res, '参数错误', 1001)
+fail('参数错误', 400)
 
-// 服务器错误
-serverError(res, '数据库连接失败')
+// 分页数据
+pageSuccess(list, total, pageNum, pageSize)
 ```
 
 ---
@@ -112,7 +116,7 @@ npm install
 # 复制环境变量模板
 cp backend/env.example backend/.env
 
-# 编辑 .env，填写数据库配置
+# 编辑 .env，填写数据库连接信息
 vim backend/.env
 ```
 
@@ -121,11 +125,8 @@ vim backend/.env
 ```env
 NODE_ENV=development
 PORT=4000
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=base_project
-DB_USER=postgres
-DB_PASSWORD=your_password
+HOST=0.0.0.0
+DATABASE_URL=postgresql://postgres:your_password@localhost:5432/base_project
 ```
 
 ### 3. 初始化数据库
@@ -138,7 +139,14 @@ createdb base_project
 psql -U postgres -d base_project -f database/init/01_init.sql
 ```
 
-### 4. 启动开发服务
+### 4. 生成 Prisma Client
+
+```bash
+# 根据 prisma/schema.prisma 生成类型安全的 Client
+npm run prisma:generate
+```
+
+### 5. 启动开发服务
 
 ```bash
 # 同时启动前端（:3000）和后端（:4000）
@@ -194,11 +202,7 @@ docker run -d \
   -p 4000:4000 \
   -e NODE_ENV=production \
   -e PORT=4000 \
-  -e DB_HOST=your_db_host \
-  -e DB_PORT=5432 \
-  -e DB_NAME=base_project \
-  -e DB_USER=postgres \
-  -e DB_PASSWORD=your_password \
+  -e DATABASE_URL=postgresql://postgres:your_password@your_db_host:5432/base_project \
   base-project:latest
 ```
 
@@ -210,7 +214,8 @@ docker run -d \
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| GET | `/api/system/health` | 健康检查 |
+| GET | `/health` | 健康检查（全局） |
+| GET | `/api/system/health` | 系统模块健康检查 |
 | GET | `/api/system/info` | 获取系统信息 |
 
 #### GET /api/system/health
@@ -222,7 +227,7 @@ docker run -d \
     "status": "ok",
     "timestamp": "2026-03-10T00:00:00.000Z"
   },
-  "message": "success"
+  "message": null
 }
 ```
 
@@ -238,7 +243,7 @@ docker run -d \
     "dbVersion": "PostgreSQL 17.x ...",
     "env": "production"
   },
-  "message": "success"
+  "message": null
 }
 ```
 
@@ -246,14 +251,14 @@ docker run -d \
 
 ## 新增路由规范
 
-### 后端新增路由
+### 后端新增模块
 
-1. 在 `backend/src/routes/` 下新建路由文件，例如 `users.js`
-2. 在 `backend/src/routes/index.js` 中注册：
+1. 在 `backend/src/modules/` 下新建模块目录，例如 `users/`
+2. 创建 `routes.ts`（路由）、`schema.ts`（Zod 校验）、`service.ts`（业务逻辑）
+3. 在 `backend/src/main.ts` 中注册：
 
-```js
-import userRouter from './users.js'
-router.use('/users', userRouter)
+```ts
+await fastify.register(import('./modules/users/routes.js'))
 ```
 
 ### 前端新增页面
@@ -267,10 +272,10 @@ router.use('/users', userRouter)
 ## 常见问题
 
 **Q: 前端构建后访问页面空白？**  
-A: 确认 `vite.config.js` 中 `build.outDir` 指向 `../backend/public`，且后端 `app.js` 中静态文件路径正确。
+A: 确认 `vite.config.js` 中 `build.outDir` 指向 `../backend/public`，且后端 `main.ts` 中 `@fastify/static` 路径配置正确。
 
 **Q: 数据库连接失败？**  
-A: 检查 `.env` 中的数据库配置，确认 PostgreSQL 服务已启动，以及数据库和用户已创建。
+A: 检查 `.env` 中的 `DATABASE_URL` 格式，确认 PostgreSQL 服务已启动，以及数据库和用户已创建。执行 `npm run prisma:generate` 确保 Prisma Client 已生成。
 
 **Q: docker-compose 启动后 app 容器退出？**  
-A: 查看日志 `docker-compose logs app`，通常是数据库连接配置问题。
+A: 查看日志 `docker-compose logs app`，通常是 `DATABASE_URL` 连接配置问题。
