@@ -36,14 +36,14 @@ application-xxxxxxxxx
 ```bash
 # 1. 创建新对话
 curl -X GET 'https://1ei0799js7678.vicp.fun:42959/chat/api/open' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44'
+  -H 'Authorization: Bearer application-xxxxxxxxx'
 
 # 返回: {"code": 200, "message": "成功", "data": "019ca485-f7a5-7953-adaf-ce6e01665c4e"}
 
 # 2. 发送消息
 curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca485-f7a5-7953-adaf-ce6e01665c4e' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44' \
+  -H 'Authorization: Bearer application-xxxxxxxxx' \
   -d '{
     "message": "你好，请介绍一下你自己",
     "stream": true,
@@ -239,14 +239,14 @@ data: {"chat_id": "...", "chat_record_id": "...", "content": "", "is_end": true,
 ```bash
 # 步骤1: 创建新对话
 curl -X GET 'https://1ei0799js7678.vicp.fun:42959/chat/api/open' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44'
+  -H 'Authorization: Bearer application-xxxxxxxxx'
 
 # 返回对话ID: 019ca485-f7a5-7953-adaf-ce6e01665c4e
 
 # 步骤2: 发送消息
 curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca485-f7a5-7953-adaf-ce6e01665c4e' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44' \
+  -H 'Authorization: Bearer application-xxxxxxxxx' \
   -d '{
     "message": "你好，请介绍一下你自己",
     "stream": true,
@@ -259,7 +259,7 @@ curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca48
 ```bash
 # 步骤1: 创建新对话
 curl -X GET 'https://1ei0799js7678.vicp.fun:42959/chat/api/open' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44'
+  -H 'Authorization: Bearer application-xxxxxxxxx'
 
 # 返回对话ID: 019ca485-f7a5-7953-adaf-ce6e01665c4e
 
@@ -276,7 +276,7 @@ curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/oss/file' \
 # 步骤3: 发送带图片的消息
 curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca485-f7a5-7953-adaf-ce6e01665c4e' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44' \
+  -H 'Authorization: Bearer application-xxxxxxxxx' \
   -d '{
     "message": "请分析这张图片",
     "stream": true,
@@ -296,7 +296,7 @@ curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca48
 # 使用之前的对话ID继续对话
 curl -X POST 'https://1ei0799js7678.vicp.fun:42959/chat/api/chat_message/019ca485-f7a5-7953-adaf-ce6e01665c4e' \
   -H 'Content-Type: application/json' \
-  -H 'Authorization: Bearer application-c3191ac1fcb60fa709a897a402996b44' \
+  -H 'Authorization: Bearer application-xxxxxxxxx' \
   -d '{
     "message": "请继续详细说明",
     "stream": true,
