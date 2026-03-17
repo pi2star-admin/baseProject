@@ -19,7 +19,7 @@ const router = createRouter({
 // 路由守卫 - 设置页面标题
 router.beforeEach((to) => {
   if (to.meta?.title) {
-    document.title = `基础平台 - ${to.meta.title}`
+    document.title = `星枢基础平台 - ${to.meta.title}`
   }
 })
 

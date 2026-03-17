@@ -4,8 +4,8 @@
     <a-layout-header class="header">
       <div class="header-inner">
         <div class="logo">
-          <img src="/favicon.svg" alt="logo" class="logo-img" />
-          <span class="logo-text">基础平台</span>
+          <img src="/logo.png" alt="logo" class="logo-img" />
+          <span class="logo-text">星枢基础平台</span>
         </div>
         <a-menu
           mode="horizontal"
@@ -24,10 +24,10 @@
       <div class="hero">
         <div class="hero-inner">
           <a-typography-title :level="1" class="hero-title">
-            欢迎使用基础平台
+            欢迎使用星枢基础平台
           </a-typography-title>
           <a-typography-paragraph class="hero-desc">
-            本项目为基础平台模板，提供统一的前后端技术栈规范，助力团队快速启动新项目。
+            本项目为星枢基础平台模板，提供统一的前后端技术栈规范，助力团队快速启动新项目。
           </a-typography-paragraph>
           <a-space size="middle">
             <a-button type="primary" size="large">快速开始</a-button>
@@ -74,7 +74,7 @@
 
     <!-- 底部 -->
     <a-layout-footer class="footer">
-      基础平台 © {{ new Date().getFullYear() }} | Vue 3 + Vite + Ant Design Vue + Express + PostgreSQL
+      星枢基础平台 © {{ new Date().getFullYear() }} | Vue 3 + Vite + Ant Design Vue + Fastify + Prisma + PostgreSQL + Zod
     </a-layout-footer>
   </a-layout>
 </template>
@@ -94,8 +94,9 @@ const techStack = [
   {
     icon: '🚀',
     title: '后端',
-    description: '基于 Express 构建 RESTful API，统一响应格式，dotenv 管理环境变量，pg 连接 PostgreSQL。',
-    tags: ['Express', 'PostgreSQL', 'dotenv', 'pg'],
+    description:
+      'Fastify + TypeScript 构建 RESTful API，结合 Zod 校验与 Prisma 访问 PostgreSQL，统一 Result 响应格式。',
+    tags: ['Fastify', 'TypeScript', 'Zod', 'Prisma', 'PostgreSQL'],
     color: 'blue',
   },
   {
@@ -109,8 +110,8 @@ const techStack = [
 
 const systemStats = ref([
   { label: '前端框架', value: 'Vue', suffix: '3' },
-  { label: '后端框架', value: 'Express', suffix: '' },
-  { label: '数据库', value: 'PostgreSQL', suffix: '' },
+  { label: '后端框架', value: 'Fastify', suffix: '' },
+  { label: '数据库', value: 'PostgreSQL', suffix: ' 17' },
 ])
 
 onMounted(async () => {
