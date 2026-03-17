@@ -21,7 +21,7 @@ https://1ei0799js7678.vicp.fun:42959
 
 ### Application API Key
 ```
-application-ce156078d1045f02413025cf8562fc75
+application-xxxxxxxxx
 ```
 
 **使用说明**：
